@@ -62,4 +62,7 @@ RESOURCES += \
 
 QMAKE_LFLAGS += -fopenmp
 QMAKE_CXXFLAGS += -fopenmp
+QMAKE_CXXFLAGS += -fno-lto
+QMAKE_CFLAGS   += -fno-lto
+QMAKE_LFLAGS   += -fno-lto
 LIBS  += -fopenmp
