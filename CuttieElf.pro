@@ -17,7 +17,8 @@ SOURCES += \
     filterconfig.cpp \
     hashcalculator.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    analyzebin.cpp
 
 #  resources.cpp
 
@@ -30,7 +31,8 @@ HEADERS += \
     excludelist.h \
     filterconfig.h \
     hashcalculator.h \
-    mainwindow.h
+    mainwindow.h \
+    analyzebin.h
 
 
 FORMS += \
@@ -62,7 +64,14 @@ RESOURCES += \
 
 QMAKE_LFLAGS += -fopenmp
 QMAKE_CXXFLAGS += -fopenmp
-QMAKE_CXXFLAGS += -fno-lto
-QMAKE_CFLAGS   += -fno-lto
-QMAKE_LFLAGS   += -fno-lto
 LIBS  += -fopenmp
+
+
+#QMAKE_CXXFLAGS += -fno-lto
+#QMAKE_CFLAGS   += -fno-lto
+#QMAKE_LFLAGS   += -fno-lto
+
+#QMAKE_CXXFLAGS -= -flto
+#QMAKE_CFLAGS -= -flto
+#QMAKE_LFLAGS -= -flto
+
