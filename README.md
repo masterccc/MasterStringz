@@ -24,8 +24,8 @@ MasterStringz is a Qt-based tool for analyzing and filtering strings extracted f
 ## Build Instructions
 
 ```sh
-qmake
-make
+qmake CuttieElf.pro
+make -j $(nproc)
 ```
 
 The binary will be generated in the project directory.
