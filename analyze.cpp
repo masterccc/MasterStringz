@@ -27,9 +27,7 @@ Analyze::Analyze(QString filepath) {
     this->extracted_strings = new QVector<QString>();
 }
 
-QMap<QString, QString>* Analyze::ParseHeader() {
-    std::cout << "POUMPOUM" << std::endl;
-}
+QMap<QString, QString>* Analyze::ParseHeader() {}
 QVector<BinarySection>*     Analyze::GetSections() {}
 QVector<QVector<QString>*>* Analyze::GetImports() {}
 

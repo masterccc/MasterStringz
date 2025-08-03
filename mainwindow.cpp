@@ -11,6 +11,7 @@
 #include "./ui_mainwindow.h"
 #include "analyze.h"
 #include "analyzeelf.h"
+#include "analyzebin.h"
 #include "binarysection.h"
 #include "config.h"
 #include "excludelist.h"
@@ -78,7 +79,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     QGraphicsPixmapItem, QGraphicsPolygonItem, QGraphicsRectItem { font-size: 23px; }";
         qApp->setStyleSheet(styleSheet);
 */
-    // DoAnalyze("./ls");
 }
 
 void MainWindow::LoadExcludeLists() {
@@ -116,8 +116,6 @@ void MainWindow::DisplaySections() {
     ui->table_sections->setColumnCount(8);
     // Nom, Offset, tailleV, tailleP, entropie, Permissiosn
     int row = 0;
-    std::cout << "disp SECTIONNNN" << std::endl;
-    std::cout << secs->count() << std::endl;
 
     for (auto e : *secs) {
         // d, s.sectionBase, s.sectionName, s.sec, s.sectionData) !=
@@ -169,17 +167,15 @@ void MainWindow::DoAnalyze(QString filepath) {
     ui->textEdit_2->append("Ssdeep: " + hc->getSSDeep());
     switch (Analyze::GetFileType(filepath)) {
         case FILETYPE::ELF:
-
             this->anal = new AnalyzeElf(filepath);
+            DisplayHeaders();
+            DisplaySections();
             break;
         default:
-            this->close();
+            this->anal = new AnalyzeBin(filepath);
+           // this->close();
     }
 
-    DisplayHeaders();
-    DisplaySections();
-
-    // ui->statusbar->showMessage(anal->GetAnalyzeDuration(),10);
 }
 
 void MainWindow::PrintImports() {}
@@ -268,8 +264,6 @@ void MainWindow::FilterQlistByString(const QListWidget* list, QString filter) {
     QRegExp filter_regex(ui->txt_filter->text());
 
     // Fonction exécutée par chaque thread
-    unsigned int bcount = 0;
-
     auto filter_thread = [&](int start, int end) {
         for (int row = start; row < end; ++row) {
             bool    hidden = false; // hidden_states[row];
@@ -329,7 +323,6 @@ void MainWindow::FilterQlistByString(const QListWidget* list, QString filter) {
         int start = i * chunk_size;
         int end   = start + chunk_size;
         threads.emplace_back(filter_thread, start, end);
-        std::cout << "item : " << num_items << "start/: " << start << " end: " << end << std::endl;
     }
 
     // Traitement dudernier fragment
@@ -337,7 +330,6 @@ void MainWindow::FilterQlistByString(const QListWidget* list, QString filter) {
     int last_chunk_size = num_items - (num_threads - 1) * chunk_size;
     int end             = start + last_chunk_size;
     threads.emplace_back(filter_thread, start, end);
-    std::cout << "item : " << num_items << "start/: " << start << " end: " << end << std::endl;
 
     // Attente de la fin des threads
     for (auto& t : threads) {
@@ -407,7 +399,6 @@ void MainWindow::UpdateFilters() {
         this->filter_config.getSizeStringsClassicChanged() &&
         this->filter_config.getSizeStringsClassic() >
             this->old_filter_config.getSizeStringsClassic()) {
-        std::cout << "Only size increase " << std::endl;
         this->FilterQlistBySize(list, this->filter_config.getSizeStringsClassic());
         this->filter_config.reset_all();
         this->old_filter_config = this->filter_config;
@@ -417,7 +408,7 @@ void MainWindow::UpdateFilters() {
     }
 
     ui->groupBox->setTitle("Loading ... ");
-    // Order de ceci important, si la taille augmente uniquement pas besoin de
+    // Ordre important, si la taille augmente uniquement pas besoin de
     // clear le flag
     for (int row = 0; row < list->count(); ++row) {
         list->item(row)->setHidden(false);
@@ -426,7 +417,6 @@ void MainWindow::UpdateFilters() {
     QElapsedTimer timer;
     timer.start();
     this->FilterQlistByString(list, this->filter_config.getFilter());
-    std::cout << "endof filter by string " << timer.elapsed() << " milliseconds" << std::endl;
     timer.restart();
 
     this->FilterQlistBySize(list, this->filter_config.getSizeStringsClassic());
@@ -480,13 +470,6 @@ void MainWindow::on_btn_debian_coreutils_clicked(bool checked) {
 }
 
 void MainWindow::DispatchEncoding(enum EncodingType ft) {
-    // Effacement des objets QPlainText avant de les remplir
-    /*   ui->txt_encode_ascii->setPlainText()
-  ui->txt_encode_ascii->clear();
-  ui->txt_encode_base64->clear();
-  ui->txt_encode_hex->clear();
-  ui->txt_encode_bin->clear();
-*/
     // Remplissage des objets QPlainText avec les valeurs des objets de la classe
     // DataEncoder
     switch (ft) {
@@ -533,8 +516,6 @@ void MainWindow::UpdateXOR() {
 }
 
 void MainWindow::on_txt_encode_ascii_textChanged() {
-    std::cout << "asciichanged" << std::endl;
-
     ui->txt_encode_base64->blockSignals(true);
     ui->txt_encode_bin->blockSignals(true);
     ui->txt_encode_hex->blockSignals(true);
@@ -547,16 +528,13 @@ void MainWindow::on_txt_encode_ascii_textChanged() {
     ui->txt_encode_hex->blockSignals(false);
 }
 void MainWindow::on_txt_encode_hex_textChanged() {
-    std::cout << "HEX CHANGED" << std::endl;
     QString input = ui->txt_encode_hex->toPlainText();
     QRegExp hexRegex("^[0-9A-Fa-f ]*$");
 
     if (!hexRegex.exactMatch(input)) {
-        std::cout << "HEX INVALID" << std::endl;
         // Données invalides, ne pas convertir
         return;
     }
-    std::cout << "HEX VALIDE" << std::endl;
     ui->txt_encode_base64->blockSignals(true);
     ui->txt_encode_ascii->blockSignals(true);
     ui->txt_encode_bin->blockSignals(true);
@@ -641,7 +619,6 @@ void MainWindow::on_action_by_ChatGPT_triggered() {
     QList<QString>    themeKeys   = themeGPTStyles.keys();
     QRandomGenerator* generator   = QRandomGenerator::global();
     QString           randomTheme = themeKeys.at(generator->bounded(themeKeys.size()));
-    std::cout << randomTheme.toStdString() << std::endl;
     // Appliquer la feuille de style correspondante à la fenêtre principale
     this->setStyleSheet(themeGPTStyles.find(randomTheme).value());
 }
@@ -674,13 +651,11 @@ void MainWindow::on_btn_rem_x64_junk_clicked(bool checked) {
     QString resource_file = "x64_junk";
     SetBoolExcludeListByName(resource_file, checked);
     this->filter_config.setX64Checked(checked);
-    std::cout << "taille list : " << this->exclude_lists->count()
-              << this->exclude_lists->at(0)->getList()->at(0).toStdString() << std::endl;
     UpdateFilters();
 }
 
 void MainWindow::on_btn_rem_x64_junk_clicked() {
-    std::cout << "passparla" << std::endl;
+
 }
 
 void MainWindow::on_btn_rem_x86_junk_clicked(bool checked) {

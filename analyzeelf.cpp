@@ -22,8 +22,6 @@ AnalyzeElf::AnalyzeElf(QString filepath) {
 
 AnalyzeElf::~AnalyzeElf() {}
 QVector<BinarySection>* AnalyzeElf::GetSections() {
-    std::cout << "Debut getsection" << std::endl;
-
     sections = new QVector<BinarySection>();
     QFile file(this->filepath);
 
@@ -74,7 +72,6 @@ QVector<BinarySection>* AnalyzeElf::GetSections() {
         sections->append(BinarySection(name, sectionHeaderTable[i].sh_offset,
                                        sectionHeaderTable[i].sh_size, *perms, 0.0));
     }
-    std::cout << "fin getsection" << std::endl;
 
     file.close();
     return sections;
