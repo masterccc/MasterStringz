@@ -1,0 +1,1 @@
+rcc -name resources test_list.qrc -o resources.cpp

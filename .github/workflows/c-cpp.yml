@@ -1,0 +1,43 @@
+name: Build (Docker Manual Qt)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build in Docker (manual Qt install)
+        run: |
+          docker run --rm -v $PWD:/workspace -w /workspace ubuntu:22.04 bash -c "
+            apt-get update &&
+            DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential qttools5-dev-tools libfuzzy-dev libssl-dev libelf-dev wget git qtbase5-dev qt6-base-dev qt6-base-dev-tools qt6-tools-dev qt6-tools-dev-tools &&
+            if ls *.pro 1>/dev/null 2>&1; then
+              qmake *.pro && make
+            elif [ -f CMakeLists.txt ]; then
+              cmake -B build && cmake --build build
+            fi
+          "
+
+      - name: Archive build
+        run: |
+          mkdir -p dist
+          cp CuttieElf dist/ || true
+          cp README.md dist/ || true
+          cd dist
+          tar -czvf ../MasterStringz-${{ github.ref_name }}.tar.gz *
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: MasterStringz-${{ github.ref_name }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

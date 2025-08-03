@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/list_pack">
+        <file>resources/debian_base.gz</file>
+        <file>resources/debian_coreutils.gz</file>
+        <file>resources/x64_junk.gz</file>
+        <file>resources/x86_junks.gz</file>
+        <file>resources/go_str.gz</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file>resources/logo.png</file>
+    </qresource>
+</RCC>
